@@ -49,8 +49,25 @@ const sortOrderText = document.getElementById('sort-order-text');
 const leaderboardTbody = document.getElementById('leaderboard-tbody');
 const submissionForm = document.getElementById('submission-form');
 
+// EmailJS 配置
+const EMAIL_CONFIG = {
+    serviceID: "service_15ha9jz",
+    templateID: "template_zdxoy7m",
+    templateID2: "template_39pek0d",
+    publicKey: "VQdIz04jyocnu8J9z",
+    adminEmail: "shenzhangxiao@outlook.com"
+};
+
 // 初始化
 document.addEventListener('DOMContentLoaded', function() {
+    // 初始化 EmailJS
+    if (typeof emailjs !== 'undefined') {
+        emailjs.init(EMAIL_CONFIG.publicKey);
+        console.log('EmailJS initialized successfully');
+    } else {
+        console.warn('EmailJS is not loaded. Email functionality will be disabled.');
+    }
+    
     updateLeaderboard();
     
     // 事件监听器
@@ -183,7 +200,7 @@ function updateLeaderboard() {
 }
 
 // 处理表单提交
-function handleSubmit(e) {
+async function handleSubmit(e) {
     e.preventDefault();
     
     const formData = new FormData(submissionForm);
@@ -199,13 +216,122 @@ function handleSubmit(e) {
         return;
     }
     
-    // 模拟提交成功
-    alert('Submission successful! We will contact you soon.');
+    // 邮箱格式验证
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.contactEmail)) {
+        alert('Please enter a valid email address.');
+        return;
+    }
     
-    // 重置表单
-    submissionForm.reset();
+    // 显示加载状态
+    const submitButton = submissionForm.querySelector('button[type="submit"]');
+    const originalText = submitButton.innerHTML;
+    submitButton.innerHTML = `
+        <svg style="width: 20px; height: 20px; animation: spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12a9 9 0 11-6.219-8.56"/>
+        </svg>
+        Submitting...
+    `;
+    submitButton.disabled = true;
     
-    console.log('Submitted data:', data);
+    try {
+        // 检查EmailJS是否配置
+        if (typeof emailjs === 'undefined' || !EMAIL_CONFIG.serviceID || EMAIL_CONFIG.serviceID === 'your_service_id') {
+            // 如果EmailJS未配置，只显示成功消息（用于开发测试）
+            console.log('EmailJS not configured. Simulating submission:', data);
+            alert('Submission successful! We will contact you soon.\n\nNote: Email functionality requires EmailJS configuration.');
+        } else {
+            // 发送邮件
+            await sendNotificationEmail(data);
+            alert('Submission successful! We will contact you soon.');
+        }
+        
+        // 重置表单
+        submissionForm.reset();
+        
+        console.log('Submitted data:', data);
+        
+    } catch (error) {
+        console.error('Submission failed:', error);
+        
+        let errorMessage = 'Submission failed. ';
+        if (error.message.includes('EmailJS')) {
+            errorMessage += 'Email service is not properly configured. ';
+        }
+        errorMessage += 'Please try again or contact us directly at whuhsy@whu.edu.cn.';
+        
+        alert(errorMessage);
+    } finally {
+        // 恢复按钮状态
+        submitButton.innerHTML = originalText;
+        submitButton.disabled = false;
+    }
+}
+
+// 邮件发送功能
+async function sendNotificationEmail(data) {
+    // 检查EmailJS是否可用
+    if (typeof emailjs === 'undefined') {
+        throw new Error('EmailJS is not loaded');
+    }
+    
+    const currentDate = new Date().toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+    
+    // 邮件模板参数
+    const templateParams = {
+        to_email: EMAIL_CONFIG.adminEmail,
+        subject: `New Model Submission - ${data.modelName}`,
+        model_name: data.modelName,
+        team_name: data.teamName,
+        contact_email: data.contactEmail,
+        contact_phone: data.contactPhone || 'Not provided',
+        repo_url: data.repoUrl || 'Not provided',
+        description: data.description || 'No description provided',
+        submission_date: currentDate,
+        user_email: data.contactEmail,
+        user_name: data.teamName
+    };
+    
+    try {
+        // 发送通知邮件给管理员
+        const adminEmailResult = await emailjs.send(
+            EMAIL_CONFIG.serviceID,
+            EMAIL_CONFIG.templateID,
+            templateParams
+        );
+        
+        console.log('Admin notification email sent:', adminEmailResult);
+        
+        // 发送确认邮件给提交者
+        const confirmationParams = {
+            to_email: data.contactEmail,
+            subject: `Model Submission Confirmation - ${data.modelName}`,
+            user_name: data.teamName,
+            model_name: data.modelName,
+            submission_date: currentDate,
+        };
+        
+        const confirmationResult = await emailjs.send(
+            EMAIL_CONFIG.serviceID,
+            EMAIL_CONFIG.templateID2,
+            confirmationParams
+        );
+        
+        console.log('Confirmation email sent:', confirmationResult);
+        
+        return { adminEmailResult, confirmationResult };
+        
+    } catch (error) {
+        console.error('Email sending error:', error);
+        throw error;
+    }
 }
 
 // 工具函数：创建SVG图标
@@ -223,4 +349,31 @@ function createSVGIcon(pathData, size = 16) {
     svg.appendChild(path);
     
     return svg;
+}
+
+// 初始化EmailJS配置（在实际使用时需要替换为真实的配置）
+function initializeEmailJS() {
+    // 检查EmailJS是否可用
+    if (typeof emailjs === 'undefined') {
+        console.error('EmailJS is not loaded. Please check the CDN link.');
+        return false;
+    }
+    
+    // 检查配置是否已更新
+    if (EMAIL_CONFIG.serviceID === 'your_service_id' || 
+        EMAIL_CONFIG.templateID === 'your_template_id' || 
+        EMAIL_CONFIG.publicKey === 'your_public_key') {
+        console.warn('EmailJS configuration not updated. Please check EMAIL_SETUP.md');
+        return false;
+    }
+    
+    // 初始化EmailJS
+    try {
+        emailjs.init(EMAIL_CONFIG.publicKey);
+        console.log('EmailJS initialized successfully');
+        return true;
+    } catch (error) {
+        console.error('EmailJS initialization failed:', error);
+        return false;
+    }
 }
