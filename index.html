@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoCode-leaderboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <div class="nav-content">
+                <div class="logo-section">
+                    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+                        <path d="M14 9h1.5a2.5 2.5 0 0 1 0 5H14"/>
+                        <path d="M6 9h8"/>
+                        <path d="M6 9v12"/>
+                        <path d="M14 9v12"/>
+                    </svg>
+                    <h1 class="logo-text">GeoCode Generation Leaderboard</h1>
+                </div>
+                <div class="nav-buttons">
+                    <button id="leaderboard-tab" class="nav-button active">
+                        <svg class="nav-button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+                            <path d="M14 9h1.5a2.5 2.5 0 0 1 0 5H14"/>
+                            <path d="M6 9h8"/>
+                            <path d="M6 9v12"/>
+                            <path d="M14 9v12"/>
+                        </svg>
+                        Leaderboard
+                    </button>
+                    <button id="submit-tab" class="nav-button">
+                        <svg class="nav-button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14"/>
+                            <path d="m12 5 7 7-7 7"/>
+                        </svg>
+                        Submit Model
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="content-wrapper">
+                <!-- Leaderboard Panel -->
+                <div id="leaderboard-panel" class="leaderboard-panel">
+                    <div class="panel-header">
+                        <div class="header-actions">
+                            <div>
+                                <h2 class="panel-title">Leaderboard for Large Language Models on Geospatial Code Generation (AutoGEEval & AutoGEEval++)</h2>
+                            </div>
+                            <button id="submit-button-header" class="submit-button-header">
+                                <svg class="nav-button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14"/>
+                                    <path d="m12 5 7 7-7 7"/>
+                                </svg>
+                                Submit Your Model
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Search and Filter -->
+                    <div class="search-filter-section">
+                        <div class="search-filter-content">
+                            <div class="search-input-container">
+                                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="m21 21-4.35-4.35"/>
+                                </svg>
+                                <input type="text" id="search-input" placeholder="Search models or teams..." class="search-input">
+                            </div>
+                            <select id="sort-select" class="filter-select">
+                                <optgroup label="AutoGEEval">
+                                    <option value="autogeeval_pass1">AutoGEEval Pass@1</option>
+                                    <option value="autogeeval_pass3">AutoGEEval Pass@3</option>
+                                    <option value="autogeeval_pass5">AutoGEEval Pass@5</option>
+                                </optgroup>
+                                <optgroup label="AutoGEEval++">
+                                    <option value="autogeevalpp_pass1">AutoGEEval++ Pass@1</option>
+                                    <option value="autogeevalpp_pass3">AutoGEEval++ Pass@3</option>
+                                    <option value="autogeevalpp_pass5">AutoGEEval++ Pass@5</option>
+                                </optgroup>
+                            </select>
+                            <button id="sort-button" class="sort-button">
+                                <svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="m21 16-4 4-4-4"/>
+                                    <path d="M17 20V4"/>
+                                    <path d="m3 8 4-4 4 4"/>
+                                    <path d="M7 4v16"/>
+                                </svg>
+                                <span id="sort-order-text">Desc</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Leaderboard Table -->
+                    <div class="table-container">
+                        <table class="leaderboard-table">
+                            <thead class="table-header">
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Model</th>
+                                    <th>Developer</th>
+                                    <th class="center">AutoGEEval<br>Pass@1</th>
+                                    <th class="center">AutoGEEval<br>Pass@3</th>
+                                    <th class="center">AutoGEEval<br>Pass@5</th>
+                                    <th class="center">AutoGEEval++<br>Pass@1</th>
+                                    <th class="center">AutoGEEval++<br>Pass@3</th>
+                                    <th class="center">AutoGEEval++<br>Pass@5</th>
+                                    <th>Type</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboard-tbody">
+                                <!-- Data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Papers Panel -->
+                <div class="papers-panel">
+                    <div class="papers-header">
+                        <h3 class="papers-title">Related Papers</h3>
+                        <p class="papers-subtitle">Our research publications</p>
+                    </div>
+                    <div class="papers-content">
+                        <div class="paper-item">
+                            <h4 class="paper-title">AutoGEEval: A Comprehensive Benchmark for Large Language Model Evaluation</h4>
+                            <p class="paper-authors">John Smith, Jane Doe, Bob Wilson</p>
+                            <p class="paper-journal">Journal of Artificial Intelligence Research, 2024</p>
+                            <div class="paper-links">
+                                <a href="https://example.com/paper1" target="_blank" class="paper-link">
+                                    <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                                        <polyline points="15,3 21,3 21,9"/>
+                                        <line x1="10" y1="14" x2="21" y2="3"/>
+                                    </svg>
+                                    Read Paper
+                                </a>
+                                <a href="https://github.com/placeholder/paper1" target="_blank" class="paper-link github">
+                                    <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                                    </svg>
+                                    GitHub
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="paper-item">
+                            <h4 class="paper-title">AutoGEEval++: Enhanced Multi-Modal Reasoning Assessment Framework</h4>
+                            <p class="paper-authors">Alice Johnson, Charlie Brown, Diana Lee</p>
+                            <p class="paper-journal">Proceedings of NeurIPS, 2024</p>
+                            <div class="paper-links">
+                                <a href="https://example.com/paper2" target="_blank" class="paper-link">
+                                    <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                                        <polyline points="15,3 21,3 21,9"/>
+                                        <line x1="10" y1="14" x2="21" y2="3"/>
+                                    </svg>
+                                    Read Paper
+                                </a>
+                                <a href="https://github.com/placeholder/paper2" target="_blank" class="paper-link github">
+                                    <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                                    </svg>
+                                    GitHub
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="paper-item">
+                            <h4 class="paper-title">Systematic Analysis of LLM Performance Using AutoGEEval Benchmarks</h4>
+                            <p class="paper-authors">Michael Chen, Sarah Davis, Robert Taylor</p>
+                            <p class="paper-journal">ACL Findings, 2023</p>
+                            <div class="paper-links">
+                                <a href="https://example.com/paper3" target="_blank" class="paper-link">
+                                    <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                                        <polyline points="15,3 21,3 21,9"/>
+                                        <line x1="10" y1="14" x2="21" y2="3"/>
+                                    </svg>
+                                    Read Paper
+                                </a>
+                                <a href="https://github.com/placeholder/paper3" target="_blank" class="paper-link github">
+                                    <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                                    </svg>
+                                    GitHub
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Model Submission Panel -->
+                <div id="submission-panel" class="submission-container" style="display: none;">
+                    <div class="submission-panel">
+                        <div class="submission-header">
+                            <h2 class="submission-title">Submit Your Model</h2>
+                            <p class="submission-subtitle">Join our evaluation benchmarks and showcase your model's capabilities</p>
+                        </div>
+                        
+                        <form id="submission-form" class="submission-content">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Model Name *</label>
+                                    <input type="text" name="modelName" required class="form-input" placeholder="e.g., MyLLM-7B">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Development Team *</label>
+                                    <input type="text" name="teamName" required class="form-input" placeholder="e.g., AI Research Lab">
+                                </div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label">
+                                    <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                                    </svg>
+                                    Model Repository URL
+                                </label>
+                                <input type="url" name="repoUrl" class="form-input" placeholder="https://github.com/yourteam/yourmodel">
+                            </div>
+
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                            <polyline points="22,6 12,13 2,6"/>
+                                        </svg>
+                                        Contact Email *
+                                    </label>
+                                    <input type="email" name="contactEmail" required class="form-input" placeholder="contact@yourteam.com">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                                        </svg>
+                                        Contact Phone
+                                    </label>
+                                    <input type="tel" name="contactPhone" class="form-input" placeholder="+1 (555) 123-4567">
+                                </div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label">Model Description</label>
+                                <textarea name="description" rows="4" class="form-textarea" placeholder="Please briefly describe your model's features, training data, parameter scale, etc..."></textarea>
+                            </div>
+
+                            <div class="submission-guidelines">
+                                <h4>Submission Guidelines</h4>
+                                <ul>
+                                    <li>• We will contact you within 3-5 business days after submission</li>
+                                    <li>• Evaluation process typically takes 1-2 weeks</li>
+                                    <li>• Results will be publicly displayed on the leaderboard</li>
+                                    <li>• For questions, contact us: evaluation@example.com</li>
+                                </ul>
+                            </div>
+
+                            <button type="submit" class="submit-form-button">
+                                <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="22" y1="2" x2="11" y2="13"/>
+                                    <polygon points="22,2 15,22 11,13 2,9 22,2"/>
+                                </svg>
+                                Submit Model
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <h3>Luojia ST Computing Lab</h3>
+                <div class="footer-contacts">
+                    <div class="contact-item">
+                        <p><strong>Contact Person 1</strong></p>
+                        <a href="mailto:person1@example.com">person1@example.com</a>
+                    </div>
+                    <div class="contact-divider"></div>
+                    <div class="contact-item">
+                        <p><strong>Contact Person 2</strong></p>
+                        <a href="mailto:person2@example.com">person2@example.com</a>
+                    </div>
+                    <div class="contact-divider"></div>
+                    <div class="contact-item">
+                        <p><strong>Contact Person 3</strong></p>
+                        <a href="mailto:person3@example.com">person3@example.com</a>
+                    </div>
+                </div>
+                <p class="footer-copyright">&copy; 2025 Luojia ST Computing Lab. All Rights Reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
